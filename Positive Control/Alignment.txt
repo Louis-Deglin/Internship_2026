@@ -1,0 +1,32 @@
+#Load module
+module load GCC/14.2.0 bwa-mem2/2.2.1 SAMtools/1.22
+
+#Creation of a local reference to speed up the analysis
+samtools faidx Bos_taurus.ARS-UCD1.2.dna.toplevel.fa 26:14394993-14414993 > cyp26c1_region.fa
+
+#Indexation of the reference with BWA
+bwa-mem2 index cyp26c1_region.fa
+
+#Alignment, conversion and sorting
+#For the calf
+bwa-mem2 mem -t 8 $BREEDMAPS/louis/reference/cyp26c1_region.fa \
+    $BREEDMAPS/louis/data/Data_article_MD/SRR12642597_1_val_1.fq.gz \
+    $BREEDMAPS/louis/data/Data_article_MD/SRR12642597_2_val_2.fq.gz | \
+    samtools sort -@ 4 -o $BREEDMAPS/louis/results/bwa_article/calf1_final.bam -
+
+samtools index $BREEDMAPS/louis/results/bwa_article/calf1_final.bam
+
+#For the dam
+bwa-mem2 mem -t 8 $BREEDMAPS/louis/reference/cyp26c1_region.fa \
+    $BREEDMAPS/louis/data/Data_article_MD/SRR12642584_1_val_1.fq.gz \
+    $BREEDMAPS/louis/data/Data_article_MD/SRR12642584_2_val_2.fq.gz | \
+    samtools sort -@ 4 -o $BREEDMAPS/louis/results/bwa_article/dam1_final.bam -
+
+samtools index $BREEDMAPS/louis/results/bwa_article/dam1_final.bam
+
+#Alignment of one of the Bonsmara (033) to the local reference to make the comparison
+singularity exec --bind $BREEDMAPS:$BREEDMAPS $container/pbmm2_26.1.0--d08c39588d4e31e5.sif \
+    pbmm2 align \
+    $BREEDMAPS/louis/reference/cyp26c1_region.fa \
+    $BREEDMAPS/louis/data/Hifi.Batch02.pr_219/pr_219_033/m84045_251120_130110_s2.hifi_reads.bc2042.bam \
+    -j 20 --sort
