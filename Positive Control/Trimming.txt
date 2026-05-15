@@ -1,0 +1,12 @@
+#Pulling the container
+singularity pull docker://community.wave.seqera.io/library/trim-galore:0.6.11--d16c399854f90a5e
+
+#Trimming the homozygous calf
+singularity exec --bind $BREEDMAPS:$BREEDMAPS $container/trim-galore_0.6.11--d16c399854f90a5e.sif\
+    trim_galore --paired --gzip --quality 20 \
+    SRR12642597_1.fastq SRR12642597_2.fastq
+
+#Trimming the heterozygous dam
+singularity exec --bind $BREEDMAPS:$BREEDMAPS $container/trim-galore_0.6.11--d16c399854f90a5e.sif\
+    trim_galore --paired --gzip --quality 20 \
+    SRR12642584_1.fastq SRR12642584_2.fastq
