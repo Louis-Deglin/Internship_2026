@@ -1,0 +1,7 @@
+#Load module
+module load GCC/13.2.0 BCFtools/1.19
+
+#Check the number of variants on the chromosome Y per individual
+bcftools query -l $BREEDMAPS/louis/results/glnexus/bonsmara_Y/cohort_8Bons_chrY.vcf.gz \
+| xargs -I {} sh -c 'echo -n "{}: " && bcftools view -s {} \
+-c 1 $BREEDMAPS/louis/results/glnexus/bonsmara_Y/cohort_8Bons_chrY.vcf.gz | bcftools view -H | wc -l'
